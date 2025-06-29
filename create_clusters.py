@@ -10,7 +10,7 @@ gpu_cluster_name = "gpt-cluster"
 cpu_cluster_name = "gpt-mini-cluster"
 
 # VM sizes
-gpu_vm_size = "Standard_NC6"         # GPU-optimized for GPT
+gpu_vm_size = "Standard_DS3_v2"         # GPU-optimized for GPT
 cpu_vm_size = "Standard_DS3_v2"      # CPU-focused for GPT-mini
 
 # Cluster settings
