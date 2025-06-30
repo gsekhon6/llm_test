@@ -18,19 +18,36 @@ gpt_env = Environment.from_conda_specification(
 # Optional: register environment (recommended for reuse)
 gpt_env.register(workspace=ws)
 
-# 5. Configure the job
-config = ScriptRunConfig(
-    source_directory=".",          # Make sure evaluate.py is in this folder
-    script="evaluate.py",
-    compute_target=compute,
-    environment=gpt_env,
-    arguments=[
-        "--input_data", dataset.as_named_input("input_data").as_mount(),
-        "--model_name", "gpt2"
-    ]
-)
+# # 5. Configure the job
+# config = ScriptRunConfig(
+#     source_directory=".",          # Make sure evaluate.py is in this folder
+#     script="evaluate.py",
+#     compute_target=compute,
+#     environment=gpt_env,
+#     arguments=[
+#         "--input_data", dataset.as_named_input("input_data").as_mount(),
+#         "--model_name", "gpt2"
+#     ]
+# )
+#
+# # 6. Submit experiment
+# experiment = Experiment(ws, "gpt-comparison")
+# run = experiment.submit(config)
+# run.wait_for_completion(show_output=True)
 
-# 6. Submit experiment
 experiment = Experiment(ws, "gpt-comparison")
-run = experiment.submit(config)
-run.wait_for_completion(show_output=True)
+
+for model_name in ["gpt2", "distilgpt2"]:
+    config = ScriptRunConfig(
+        source_directory=".",
+        script="evaluate.py",
+        compute_target=compute,
+        environment=gpt_env,
+        arguments=[
+            "--input_data", dataset.as_named_input("input_data").as_mount(),
+            "--model_name", model_name
+        ]
+    )
+
+    run = experiment.submit(config)
+    print(f"Submitted run for {model_name}: {run.id}")
