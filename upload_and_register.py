@@ -2,6 +2,7 @@ from azureml.core import Workspace, Dataset
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions
 from azure.storage.blob import BlobServiceClient
 from datetime import datetime, timedelta
+import os
 
 # Load Azure ML workspace from config.json
 ws = Workspace.from_config()
@@ -20,8 +21,11 @@ datastore.upload_files(
     show_progress=True
 )
 
-# Create a Tabular Dataset from the uploaded file
-dataset = Dataset.Tabular.from_delimited_files(path=(datastore, "datasets/squad/train.csv"))
+# # Create a Tabular Dataset from the uploaded file
+# dataset = Dataset.Tabular.from_delimited_files(path=(datastore, "datasets/squad/train.csv"))
+
+# Register as FileDataset (must be FileDataset to support mount)
+dataset = Dataset.File.from_files(path=(datastore, "datasets/squad/train.csv"))
 
 # Register the dataset in Azure ML
 dataset = dataset.register(
@@ -35,7 +39,8 @@ print("TabularDataset 'squad_train_v1' registered successfully.")
 
 # Replace with your storage account info
 account_name = "mltest16843092961"
-account_key = "tYlRzSX57lS6yEqqVjl8kSg8yxO9J0TsXW/7ZEHlIfR7RDEFS5Sp4Vt0LQkPvV9gBxzuadVzyRwn+ASt+ZUBKw=="  # from Azure Portal → Access keys
+account_key = os.environ["AZURE_STORAGE_KEY"]
+# account_key = "tYlRzSX57lS6yEqqVjl8kSg8yxO9J0TsXW/7ZEHlIfR7RDEFS5Sp4Vt0LQkPvV9gBxzuadVzyRwn+ASt+ZUBKw=="  # from Azure Portal → Access keys
 container_name = "azureml-blobstore-9a827842-ad93-41e0-988d-94cb363da755"     # usually like 'azureml-blobstore-...'
 blob_name = "datasets/squad/train.csv"       # path to your uploaded file
 
@@ -52,6 +57,6 @@ sas_token = generate_blob_sas(
 # Build the full URL
 sas_url = f"https://{account_name}.blob.core.windows.net/{container_name}/{blob_name}?{sas_token}"
 
-print("✅ SAS URL to blob:\n", sas_url)
+print("SAS URL to blob:\n", sas_url)
 # sas_url = datastore.generate_shared_access_signature()
 # print("SAS URL:", sas_url)
